@@ -1,0 +1,40 @@
+language: julia
+julia:
+  - 0.6
+  - 0.7
+  - 1.0
+  - 1.1
+  - nightly
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/ecfd7123156aeb0a3bf3
+    on_success: change
+    on_failure: always
+    on_start: never
+codecov: true
+coveralls: true
+jobs:
+  include:
+    - &docs
+      stage: "Documentation"
+      julia: 1.0
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate(); Pkg.develop(PackageSpec(path=pwd()))'
+        - julia --project=docs/ docs/make.jl
+    - <<: *docs
+      julia: 0.7
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate()'
+        - julia -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()))'
+        - julia --project=docs/ docs/make.jl
+    - <<: *docs
+      julia: 1.1
+    - <<: *docs
+      julia: nightly
+    - <<: *docs
+      julia: 0.6
+      script:
+        - julia -e 'Pkg.add("Documenter", v"0.19.6", v"0.19.6+"); Pkg.clone(pwd())'
+        - julia docs/make.jl
